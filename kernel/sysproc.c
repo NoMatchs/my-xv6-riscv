@@ -110,3 +110,33 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_hello(void)
+{
+  printk("Hello Form Kernel\n");
+  return 0;
+}
+
+uint64
+sys_getprocname(void)
+{
+  uint64 buf_addr;
+  int max;
+  struct proc *p = myproc();
+
+  argaddr(0, &buf_addr);
+  argint(1, &max);
+
+  printk("DEBUG: p->name is '%s', buf_addr is %lx, max is %d\n", p->name, buf_addr, max);
+
+  if (max > 16) max = 16;
+
+  int ret = copyout(p->pagetable, p->sz, buf_addr, p->name, max);
+  printk("DEBUG: copyout returned %d\n", ret);
+
+  if (ret < 0)
+    return -1;
+
+  return 0;
+}
